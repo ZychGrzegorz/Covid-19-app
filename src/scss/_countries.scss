@@ -1,0 +1,43 @@
+#root {
+  height: 100vh;
+  .App {
+    color: #eeeeee;
+    background-color: #333333;
+    text-align: center;
+    h1 {
+      padding-bottom: 5px;
+    }
+  }
+  .map-container {
+    height: 100vh;
+    overflow: hidden;
+
+    & div {
+    }
+    & div > div {
+    }
+    & div > div > svg {
+      & > g {
+        & > g {
+          & .gBeforePath {
+            transform: translate(330px, 40px) scale(1.2);
+          }
+        }
+      }
+    }
+    div[role] {
+      margin-right: 30px;
+    }
+  }
+}
+.land {
+  position: absolute;
+  z-index: 1;
+  fill: gray;
+}
+
+.land:hover,
+.land:active {
+  stroke: black;
+  stroke-width: 1;
+}
