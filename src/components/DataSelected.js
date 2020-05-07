@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import NumberFormat from "react-number-format";
 import Moment from "react-moment";
 
@@ -15,6 +15,19 @@ export default function DataSelected({ data, selectedCountry }) {
     });
   }, [selectedCountry]);
 
+  useEffect(() => {
+    if (country) {
+      let pSelected = document.querySelectorAll(".dataSelected p");
+
+      pSelected.forEach((p) => {
+        p.classList.remove("update");
+
+        setTimeout(() => {
+          p.classList.add("update");
+        }, 1);
+      });
+    }
+  }, [country]);
   return (
     <div className="dataSelected">
       {country ? (
@@ -62,7 +75,7 @@ export default function DataSelected({ data, selectedCountry }) {
         <>
           <p></p>
           <p></p>
-          <p>Loading...</p>
+          <span>Loading...</span>
           <p></p>
           <p></p>
         </>

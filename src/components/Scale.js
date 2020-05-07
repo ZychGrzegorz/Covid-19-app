@@ -11,6 +11,8 @@ export default function Scale() {
       <p className="scale-square"> {"<"} 5,000</p>
       <p className="scale-square"> {"<"} 1,000</p>
       <p className="scale-square"> {"<"} 100</p>
+      <p className="scale-square"> {"="} 0</p>
+      <p className="scale-square"> no data</p>
     </div>
   );
 }

@@ -7,10 +7,20 @@ export default function DataTotal(props) {
   useEffect(() => {
     setWorldData(props.totalData);
   }, [props]);
-  // if (props) {
-  //   const { confirmed, critical, deaths, recovered, lastUpdate } = props;
-  // }
-  // console.log(props);
+  useEffect(() => {
+    if (worldData) {
+      let pSelected = document.querySelectorAll(".dataTotal p");
+
+      pSelected.forEach((p) => {
+        p.classList.remove("update");
+
+        setTimeout(() => {
+          p.classList.add("update");
+        }, 1);
+      });
+    }
+  }, [worldData]);
+
   return (
     <div className="dataTotal">
       {worldData ? (
@@ -57,7 +67,7 @@ export default function DataTotal(props) {
         <>
           <p></p>
           <p></p>
-          <p>Loading...</p>
+          <span>Loading...</span>
           <p></p>
           <p></p>
         </>

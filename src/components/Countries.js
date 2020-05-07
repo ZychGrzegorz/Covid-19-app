@@ -19,6 +19,8 @@ export default class Countries extends React.PureComponent {
       tool: TOOL_NONE,
       value: INITIAL_VALUE,
       sortedCountries: null,
+      currentColor: null,
+      ready: false,
     };
   }
   Viewer = null;
@@ -26,11 +28,11 @@ export default class Countries extends React.PureComponent {
   componentDidMount() {
     this.Viewer.fitToViewer();
 
-    const distGBeforePath = document.querySelector(".gBeforePath");
-    console.dir(distGBeforePath);
-    console.dir(window.innerWidth);
-    console.dir(distGBeforePath.getBBox().width);
-    console.dir(distGBeforePath.getBoundingClientRect().width);
+    const mapContainer = document.querySelector(".map-container");
+    // console.dir(distGBeforePath);
+    // console.dir(window.innerWidth);
+    // console.dir(distGBeforePath.getBBox().width);
+    // console.dir(distGBeforePath.getBoundingClientRect().width);
     // console.dir(distGBeforePath.getBoundingClientRect().height);
     setTimeout(() => {
       const countries = document.querySelectorAll(".land");
@@ -41,13 +43,13 @@ export default class Countries extends React.PureComponent {
               if (el.confirmed === 0) {
                 country.setAttribute("style", "fill: 	#F7EEE1");
               } else if (el.confirmed > 0 && el.confirmed < 100) {
-                country.setAttribute("style", "fill:#FDD49E");
+                country.setAttribute("style", "fill: #FDD49E");
               } else if (el.confirmed >= 100 && el.confirmed < 1000) {
-                country.setAttribute("style", "fill:#FDBB84");
+                country.setAttribute("style", "fill: #FDBB84");
               } else if (el.confirmed >= 1000 && el.confirmed < 5000) {
-                country.setAttribute("style", "fill:#FC8D59");
+                country.setAttribute("style", "fill: #FC8D59");
               } else if (el.confirmed >= 5000 && el.confirmed < 20000) {
-                country.setAttribute("style", "fill:#EF6548");
+                country.setAttribute("style", "fill: #EF6548");
               } else if (el.confirmed >= 20000 && el.confirmed < 50000) {
                 country.setAttribute("style", "fill:	#D7301F");
               } else if (el.confirmed >= 50000 && el.confirmed < 150000) {
@@ -58,16 +60,15 @@ export default class Countries extends React.PureComponent {
             }
           });
         });
+        mapContainer.style.pointerEvents = "auto";
       } else {
         console.log("Failed data loading. Try again.");
       }
+      this.setState({ ready: true });
     }, 2000);
   }
 
   componentDidUpdate() {
-    // const mapa = document.querySelector(".map-container");
-    // console.log(mapa);
-    // mapa.setAttribute("style", `width: ${window.innerWidth}px`);
     this.setState({
       sortedCountries: this.props.data.sort((a, b) => {
         return a.confirmed - b.confirmed;
@@ -83,9 +84,6 @@ export default class Countries extends React.PureComponent {
     this.setState({ value: nextValue });
   }
 
-  // fitToViewer() {
-  //   this.Viewer.fitToViewer();
-  // }
   fitToViewer(SVGAlignX = "center", SVGAlignY = "center") {
     this.setState((state) => ({
       value: fitToViewer((SVGAlignX = "center"), (SVGAlignY = "center")),
@@ -96,16 +94,30 @@ export default class Countries extends React.PureComponent {
     this.setState((state) => ({
       value: fitSelection(state.value, 0, 0, 800, 800),
     }));
-    // this.Viewer.fitSelection(100, 100, 20, 20);
-    // this.Viewer.fitSelection(40, 40, 200, 200);
   }
 
   zoomOnViewerCenter() {
     this.setState((state) => ({ value: zoomOnViewerCenter(state.value, 1.1) }));
-    // this.Viewer.zoomOnViewerCenter(1.1);
   }
   handleClick = (e) => {
-    this.props.setSelectedCountry(e.target.getAttribute("title"));
+    if (this.state.ready) {
+      this.props.setSelectedCountry(e.target.getAttribute("title"));
+
+      const curColor = () => {
+        if (e.target.getAttribute("style")) {
+          return e.target.getAttribute("style").slice(6);
+        } else {
+          return "gray";
+        }
+      };
+      this.setState({ currentColor: curColor() });
+      e.target.setAttribute("style", "fill: gold");
+    }
+  };
+  handleOut = (e) => {
+    if (this.state.ready) {
+      e.target.setAttribute("style", `fill: ${this.state.currentColor}`);
+    }
   };
 
   render() {
@@ -128,7 +140,6 @@ export default class Countries extends React.PureComponent {
           <hr />
         </div>
         <ReactSVGPanZoom
-          // width={800}
           style={{ overflow: "visible", zIndex: "2" }}
           width={window.innerWidth}
           height={window.innerHeight * 0.9}
@@ -146,37 +157,16 @@ export default class Countries extends React.PureComponent {
         >
           <svg
             className="main-map "
-            // style={{
-            //   // width: "100%",
-            //   display: "flex",
-            //   // justifyContent: "center",
-            //   // alignItems: "center",
-            //   // marginLeft: "100px",
-            // }}
             width={window.innerWidth}
-            // width={800}
             height={window.innerHeight}
-            // height={680}
           >
-            <g
-              className="gBeforePath "
-              style={
-                {
-                  // width: "100%",
-                  // height: "100%",
-                  // display: "flex",
-                  // justifyContent: "center",
-                  // alignItems: "center",
-                  // marginLeft: "100px",
-                  // marginLeft: "auto",
-                  // marginRight: "auto",
-                }
-              }
-            >
+            <g className="gBeforePath ">
               <path
-                // style={{ fill: "blue" }}
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
+                // style={{ fill: "green" }}
                 id="AE"
                 title="UAE"
                 className="land"
@@ -185,6 +175,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="AF"
                 title="Afghanistan"
                 className="land"
@@ -193,6 +185,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="AL"
                 title="Albania"
                 className="land"
@@ -201,6 +195,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="AM"
                 title="Armenia"
                 className="land"
@@ -209,6 +205,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="AO"
                 title="Angola"
                 className="land"
@@ -217,6 +215,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="AR"
                 title="Argentina"
                 className="land"
@@ -225,6 +225,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="AT"
                 title="Austria"
                 className="land"
@@ -233,6 +235,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="AU"
                 title="Australia"
                 className="land"
@@ -241,6 +245,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="AZ"
                 title="Azerbaijan"
                 className="land"
@@ -249,6 +255,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BA"
                 title="Bosnia and Herzegovina"
                 className="land"
@@ -257,6 +265,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BD"
                 title="Bangladesh"
                 className="land"
@@ -265,6 +275,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BE"
                 title="Belgium"
                 className="land"
@@ -273,6 +285,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BF"
                 title="Burkina Faso"
                 className="land"
@@ -281,6 +295,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BG"
                 title="Bulgaria"
                 className="land"
@@ -289,6 +305,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BI"
                 title="Burundi"
                 className="land"
@@ -297,6 +315,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BJ"
                 title="Benin"
                 className="land"
@@ -305,6 +325,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BN"
                 title="Brunei Darussalam"
                 className="land"
@@ -313,6 +335,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BO"
                 title="Bolivia"
                 className="land"
@@ -321,6 +345,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BR"
                 title="Brazil"
                 className="land"
@@ -329,6 +355,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BS"
                 title="Bahamas"
                 className="land"
@@ -337,6 +365,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BT"
                 title="Bhutan"
                 className="land"
@@ -345,6 +375,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BW"
                 title="Botswana"
                 className="land"
@@ -353,6 +385,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BY"
                 title="Belarus"
                 className="land"
@@ -361,6 +395,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="BZ"
                 title="Belize"
                 className="land"
@@ -369,6 +405,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CA"
                 title="Canada"
                 className="land"
@@ -377,6 +415,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CD"
                 title="Congo"
                 className="land"
@@ -385,6 +425,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CF"
                 title="CAR"
                 className="land"
@@ -393,6 +435,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CG"
                 title="Congo"
                 className="land"
@@ -401,6 +445,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CH"
                 title="Switzerland"
                 className="land"
@@ -409,6 +455,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CI"
                 title="Ivory Coast"
                 className="land"
@@ -417,6 +465,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CL"
                 title="Chile"
                 className="land"
@@ -425,6 +475,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CM"
                 title="Cameroon"
                 className="land"
@@ -433,6 +485,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CN"
                 title="China"
                 className="land"
@@ -441,6 +495,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CO"
                 title="Colombia"
                 className="land"
@@ -449,6 +505,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CR"
                 title="Costa Rica"
                 className="land"
@@ -457,6 +515,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CU"
                 title="Cuba"
                 className="land"
@@ -465,6 +525,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CY"
                 title="Cyprus"
                 className="land"
@@ -473,6 +535,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="CZ"
                 title="Czech Republic"
                 className="land"
@@ -481,6 +545,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="DE"
                 title="Germany"
                 className="land"
@@ -489,6 +555,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="DJ"
                 title="Djibouti"
                 className="land"
@@ -497,6 +565,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="DK"
                 title="Denmark"
                 className="land"
@@ -505,6 +575,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="DO"
                 title="Dominican Republic"
                 className="land"
@@ -513,6 +585,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="DZ"
                 title="Algeria"
                 className="land"
@@ -521,6 +595,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="EC"
                 title="Ecuador"
                 className="land"
@@ -529,6 +605,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="EE"
                 title="Estonia"
                 className="land"
@@ -537,6 +615,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="EG"
                 title="Egypt"
                 className="land"
@@ -545,6 +625,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="EH"
                 title="Western Sahara"
                 className="land"
@@ -553,6 +635,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="ER"
                 title="Eritrea"
                 className="land"
@@ -561,6 +645,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="ES"
                 title="Spain"
                 className="land"
@@ -569,6 +655,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="ET"
                 title="Ethiopia"
                 className="land"
@@ -577,6 +665,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="FK"
                 title="Falkland Islands"
                 className="land"
@@ -585,6 +675,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="FI"
                 title="Finland"
                 className="land"
@@ -593,6 +685,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="FJ"
                 title="Fiji"
                 className="land"
@@ -601,6 +695,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="FR"
                 title="France"
                 className="land"
@@ -609,6 +705,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GA"
                 title="Gabon"
                 className="land"
@@ -617,6 +715,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GB"
                 title="UK"
                 className="land"
@@ -625,6 +725,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GE"
                 title="Georgia"
                 className="land"
@@ -633,6 +735,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GF"
                 title="French Guiana"
                 className="land"
@@ -641,6 +745,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GH"
                 title="Ghana"
                 className="land"
@@ -649,6 +755,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GL"
                 title="Greenland"
                 className="land"
@@ -657,6 +765,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GM"
                 title="Gambia"
                 className="land"
@@ -665,6 +775,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GN"
                 title="Guinea"
                 className="land"
@@ -673,6 +785,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GQ"
                 title="Equatorial Guinea"
                 className="land"
@@ -681,6 +795,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GR"
                 title="Greece"
                 className="land"
@@ -689,6 +805,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GT"
                 title="Guatemala"
                 className="land"
@@ -697,6 +815,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GW"
                 title="Guinea-Bissau"
                 className="land"
@@ -705,6 +825,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="GY"
                 title="Guyana"
                 className="land"
@@ -713,6 +835,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="HN"
                 title="Honduras"
                 className="land"
@@ -721,6 +845,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="HR"
                 title="Croatia"
                 className="land"
@@ -729,6 +855,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="HT"
                 title="Haiti"
                 className="land"
@@ -737,6 +865,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="HU"
                 title="Hungary"
                 className="land"
@@ -745,6 +875,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="ID"
                 title="Indonesia"
                 className="land"
@@ -753,6 +885,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="IE"
                 title="Ireland"
                 className="land"
@@ -761,6 +895,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="IL"
                 title="Israel"
                 className="land"
@@ -769,6 +905,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="IN"
                 title="India"
                 className="land"
@@ -777,6 +915,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="IQ"
                 title="Iraq"
                 className="land"
@@ -785,6 +925,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="IR"
                 title="Iran"
                 className="land"
@@ -793,6 +935,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="IS"
                 title="Iceland"
                 className="land"
@@ -801,6 +945,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="IT"
                 title="Italy"
                 className="land"
@@ -809,6 +955,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="JM"
                 title="Jamaica"
                 className="land"
@@ -817,6 +965,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="JO"
                 title="Jordan"
                 className="land"
@@ -825,6 +975,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="JP"
                 title="Japan"
                 className="land"
@@ -833,6 +985,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="KE"
                 title="Kenya"
                 className="land"
@@ -841,6 +995,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="KG"
                 title="Kyrgyzstan"
                 className="land"
@@ -849,6 +1005,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="KH"
                 title="Cambodia"
                 className="land"
@@ -857,6 +1015,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="KP"
                 title="North Korea"
                 className="land"
@@ -865,6 +1025,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="KR"
                 title="South Korea"
                 className="land"
@@ -873,6 +1035,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="XK"
                 title="Kosovo* (disputed teritory)"
                 className="land"
@@ -881,6 +1045,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="KW"
                 title="Kuwait"
                 className="land"
@@ -889,6 +1055,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="KZ"
                 title="Kazakhstan"
                 className="land"
@@ -897,6 +1065,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="LA"
                 title="Laos"
                 className="land"
@@ -905,6 +1075,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="LB"
                 title="Lebanon"
                 className="land"
@@ -913,6 +1085,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="LK"
                 title="Sri Lanka"
                 className="land"
@@ -921,6 +1095,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="LR"
                 title="Liberia"
                 className="land"
@@ -929,6 +1105,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="LS"
                 title="Lesotho"
                 className="land"
@@ -937,6 +1115,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="LT"
                 title="Lithuania"
                 className="land"
@@ -945,6 +1125,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="LU"
                 title="Luxembourg"
                 className="land"
@@ -953,6 +1135,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="LV"
                 title="Latvia"
                 className="land"
@@ -961,6 +1145,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="LY"
                 title="Libya"
                 className="land"
@@ -969,6 +1155,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MA"
                 title="Morocco"
                 className="land"
@@ -977,6 +1165,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MD"
                 title="Moldova"
                 className="land"
@@ -985,6 +1175,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="ME"
                 title="Montenegro"
                 className="land"
@@ -993,6 +1185,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MG"
                 title="Madagascar"
                 className="land"
@@ -1001,6 +1195,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MK"
                 title="North Macedonia"
                 className="land"
@@ -1009,6 +1205,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="ML"
                 title="Mali"
                 className="land"
@@ -1017,6 +1215,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MM"
                 title="Myanmar"
                 className="land"
@@ -1025,6 +1225,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MN"
                 title="Mongolia"
                 className="land"
@@ -1033,6 +1235,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MR"
                 title="Mauritania"
                 className="land"
@@ -1041,6 +1245,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MW"
                 title="Malawi"
                 className="land"
@@ -1049,6 +1255,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MX"
                 title="Mexico"
                 className="land"
@@ -1057,6 +1265,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MY"
                 title="Malaysia"
                 className="land"
@@ -1065,6 +1275,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="MZ"
                 title="Mozambique"
                 className="land"
@@ -1073,6 +1285,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="NA"
                 title="Namibia"
                 className="land"
@@ -1081,6 +1295,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="NC"
                 title="New Caledonia"
                 className="land"
@@ -1089,6 +1305,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="NE"
                 title="Niger"
                 className="land"
@@ -1097,6 +1315,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="NG"
                 title="Nigeria"
                 className="land"
@@ -1105,6 +1325,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="NI"
                 title="Nicaragua"
                 className="land"
@@ -1113,6 +1335,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="NL"
                 title="Netherlands"
                 className="land"
@@ -1121,6 +1345,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="NO"
                 title="Norway"
                 className="land"
@@ -1129,6 +1355,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="NP"
                 title="Nepal"
                 className="land"
@@ -1137,6 +1365,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="NZ"
                 title="New Zealand"
                 className="land"
@@ -1145,6 +1375,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="OM"
                 title="Oman"
                 className="land"
@@ -1153,6 +1385,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="PA"
                 title="Panama"
                 className="land"
@@ -1161,6 +1395,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="PE"
                 title="Peru"
                 className="land"
@@ -1169,6 +1405,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="PG"
                 title="Papua New Guinea"
                 className="land"
@@ -1177,6 +1415,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="PH"
                 title="Philippines"
                 className="land"
@@ -1185,6 +1425,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="PL"
                 title="Poland"
                 className="land"
@@ -1193,6 +1435,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="PK"
                 title="Pakistan"
                 className="land"
@@ -1201,6 +1445,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="PR"
                 title="Puerto Rico"
                 className="land"
@@ -1209,6 +1455,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="PS"
                 title="Palestinian Territories"
                 className="land"
@@ -1217,6 +1465,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="PT"
                 title="Portugal"
                 className="land"
@@ -1225,6 +1475,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="PY"
                 title="Paraguay"
                 className="land"
@@ -1233,6 +1485,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="QA"
                 title="Qatar"
                 className="land"
@@ -1241,6 +1495,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="RO"
                 title="Romania"
                 className="land"
@@ -1249,6 +1505,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="RS"
                 title="Serbia"
                 className="land"
@@ -1257,6 +1515,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="RU"
                 title="Russia"
                 className="land"
@@ -1265,6 +1525,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="RW"
                 title="Rwanda"
                 className="land"
@@ -1273,6 +1535,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SA"
                 title="Saudi Arabia"
                 className="land"
@@ -1281,6 +1545,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SB"
                 title="Solomon Islands"
                 className="land"
@@ -1289,6 +1555,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SD"
                 title="Sudan"
                 className="land"
@@ -1297,6 +1565,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SE"
                 title="Sweden"
                 className="land"
@@ -1305,6 +1575,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SI"
                 title="Slovenia"
                 className="land"
@@ -1313,6 +1585,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SJ"
                 title="Svalbard and Jan Mayen"
                 className="land"
@@ -1321,6 +1595,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SK"
                 title="Slovakia"
                 className="land"
@@ -1329,6 +1605,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SL"
                 title="Sierra Leone"
                 className="land"
@@ -1337,6 +1615,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SN"
                 title="Senegal"
                 className="land"
@@ -1345,6 +1625,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SO"
                 title="Somalia"
                 className="land"
@@ -1353,6 +1635,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SR"
                 title="Suriname"
                 className="land"
@@ -1361,6 +1645,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SS"
                 title="South Sudan"
                 className="land"
@@ -1369,6 +1655,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SV"
                 title="El Salvador"
                 className="land"
@@ -1377,6 +1665,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SY"
                 title="Syria"
                 className="land"
@@ -1385,6 +1675,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="SZ"
                 title="Swaziland"
                 className="land"
@@ -1393,6 +1685,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TD"
                 title="Chad"
                 className="land"
@@ -1401,6 +1695,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TF"
                 title="French Southern and Antarctic Lands"
                 className="land"
@@ -1409,6 +1705,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TG"
                 title="Togo"
                 className="land"
@@ -1417,6 +1715,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TH"
                 title="Thailand"
                 className="land"
@@ -1425,6 +1725,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TJ"
                 title="Tajikistan"
                 className="land"
@@ -1433,6 +1735,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TL"
                 title="Timor-Leste"
                 className="land"
@@ -1441,6 +1745,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TM"
                 title="Turkmenistan"
                 className="land"
@@ -1449,6 +1755,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TN"
                 title="Tunisia"
                 className="land"
@@ -1457,6 +1765,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TR"
                 title="Turkey"
                 className="land"
@@ -1465,6 +1775,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TT"
                 title="Trinidad and Tobago"
                 className="land"
@@ -1473,6 +1785,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TW"
                 title="Taiwan"
                 className="land"
@@ -1481,6 +1795,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="TZ"
                 title="Tanzania"
                 className="land"
@@ -1489,6 +1805,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="UA"
                 title="Ukraine"
                 className="land"
@@ -1497,6 +1815,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="UG"
                 title="Uganda"
                 className="land"
@@ -1505,6 +1825,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="US"
                 title="USA"
                 className="land"
@@ -1513,6 +1835,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="UY"
                 title="Uruguay"
                 className="land"
@@ -1521,6 +1845,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="UZ"
                 title="Uzbekistan"
                 className="land"
@@ -1529,6 +1855,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="VE"
                 title="Venezuela"
                 className="land"
@@ -1537,6 +1865,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="VN"
                 title="Vietnam"
                 className="land"
@@ -1545,6 +1875,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="VU"
                 title="Vanuatu"
                 className="land"
@@ -1553,6 +1885,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="YE"
                 title="Yemen"
                 className="land"
@@ -1561,6 +1895,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="ZA"
                 title="South Africa"
                 className="land"
@@ -1569,6 +1905,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="ZM"
                 title="Zambia"
                 className="land"
@@ -1577,6 +1915,8 @@ export default class Countries extends React.PureComponent {
               <path
                 onMouseEnter={this.handleClick}
                 onTouchStart={this.handleClick}
+                onMouseOut={this.handleOut}
+                onTouchEnd={this.handleOut}
                 id="ZW"
                 title="Zimbabwe"
                 className="land"

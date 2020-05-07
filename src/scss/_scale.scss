@@ -17,26 +17,33 @@
     position: relative;
     margin-bottom: 0px;
 
-    &:nth-child(1)::before {
+    &:nth-child(2)::before {
       background: #7f0000;
     }
-    &:nth-child(2)::before {
+    &:nth-child(3)::before {
       background: #b30000;
     }
-    &:nth-child(3)::before {
+    &:nth-child(4)::before {
       background: #d7301f;
     }
-    &:nth-child(4)::before {
+    &:nth-child(5)::before {
       background: #ef6548;
     }
-    &:nth-child(5)::before {
+    &:nth-child(6)::before {
       background: #fc8d59;
     }
-    &:nth-child(6)::before {
+    &:nth-child(7)::before {
       background: #fdbb84;
     }
-    &:nth-child(7)::before {
+    &:nth-child(8)::before {
       background: #fdd49e;
+    }
+    ::before {
+      background: #f7eee1;
+    }
+
+    &:nth-child(10)::before {
+      background: gray;
     }
 
     &::before {

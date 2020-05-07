@@ -9,8 +9,16 @@
     }
   }
   .map-container {
+    // z-index: -1;
     height: 100vh;
     overflow: hidden;
+    pointer-events: none;
+    // .btnFit {
+    //   position: absolute;
+    //   left: 100px;
+    //   top: 100px;
+    //   z-index: 999;
+    // }
 
     & div {
     }

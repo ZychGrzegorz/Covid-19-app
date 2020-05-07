@@ -17,4 +17,14 @@
   flex-direction: column;
   justify-content: center;
   align-content: center;
+  overflow: hidden;
+  p {
+    transform: translateX(200px);
+    transition-duration: 0s;
+  }
+  .update {
+    transform: translateX(0px);
+    transition-duration: 0.3s;
+    transition-property: transform;
+  }
 }
