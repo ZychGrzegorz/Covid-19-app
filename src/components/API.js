@@ -1,5 +1,3 @@
-// import { useState, useEffect } from "react";
-
 export function API() {
   const fetchAll = (getData) => {
     fetch("https://covid-19-data.p.rapidapi.com/country/all?format=json", {

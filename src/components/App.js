@@ -4,29 +4,33 @@ import Countries from "./Countries";
 import DataSelected from "./DataSelected";
 import DataTotal from "./DataTotal";
 import Scale from "./Scale";
+import ScaleDead from "./ScaleDead";
 import { API } from "./API";
 
 const App = () => {
   const [data, getData] = useState([]);
   const [totalData, getTotalData] = useState();
   const [selectedCountry, setSelectedCountry] = useState();
+  const [renderScale, setRenderScale] = useState(true);
   const { fetchAll, fetchTotal } = API();
   useEffect(() => {
     fetchAll(getData);
     fetchTotal(getTotalData);
   }, []);
-  // d-flex justify-content-center
+
   return (
     <main>
       <div className="App title">
         <h1 className="">Covid 19 around the world</h1>
       </div>
 
-      <div
-        className="map-container"
-        //  style={{ zIndex: "9", background: "transparent" }}
-      >
-        <Countries data={data} setSelectedCountry={setSelectedCountry} />
+      <div className="map-container">
+        <Countries
+          data={data}
+          setSelectedCountry={setSelectedCountry}
+          renderScale={renderScale}
+          setRenderScale={setRenderScale}
+        />
       </div>
 
       <DataTotal totalData={totalData} getTotalData={getTotalData} />
@@ -36,8 +40,7 @@ const App = () => {
         getData={getData}
         selectedCountry={selectedCountry}
       />
-
-      <Scale />
+      {renderScale ? <Scale /> : <ScaleDead />}
     </main>
   );
 };

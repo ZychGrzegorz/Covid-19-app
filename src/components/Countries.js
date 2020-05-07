@@ -1,7 +1,6 @@
 import React from "react";
-// import { ReactSVGPanZoom } from "react-svg-pan-zoom";
-import { ReactSvgPanZoomLoader } from "react-svg-pan-zoom-loader";
-// import { AutoSizer } from "react-virtualized";
+import { CountryColors } from "./CountryColors";
+
 import {
   fitSelection,
   fitToViewer,
@@ -14,13 +13,15 @@ import {
 export default class Countries extends React.PureComponent {
   constructor(props) {
     super(props);
-
+    const { sortConfirmed, sortDeaths } = CountryColors();
     this.state = {
       tool: TOOL_NONE,
       value: INITIAL_VALUE,
       sortedCountries: null,
       currentColor: null,
       ready: false,
+      sortConfirmed: sortConfirmed,
+      sortDeaths: sortDeaths,
     };
   }
   Viewer = null;
@@ -29,35 +30,13 @@ export default class Countries extends React.PureComponent {
     this.Viewer.fitToViewer();
 
     const mapContainer = document.querySelector(".map-container");
-    // console.dir(distGBeforePath);
-    // console.dir(window.innerWidth);
-    // console.dir(distGBeforePath.getBBox().width);
-    // console.dir(distGBeforePath.getBoundingClientRect().width);
-    // console.dir(distGBeforePath.getBoundingClientRect().height);
+
     setTimeout(() => {
       const countries = document.querySelectorAll(".land");
       if (this.state.sortedCountries) {
         countries.forEach((country) => {
-          this.state.sortedCountries.forEach((el, index) => {
-            if (country.attributes.title.value === el.country) {
-              if (el.confirmed === 0) {
-                country.setAttribute("style", "fill: 	#F7EEE1");
-              } else if (el.confirmed > 0 && el.confirmed < 100) {
-                country.setAttribute("style", "fill: #FDD49E");
-              } else if (el.confirmed >= 100 && el.confirmed < 1000) {
-                country.setAttribute("style", "fill: #FDBB84");
-              } else if (el.confirmed >= 1000 && el.confirmed < 5000) {
-                country.setAttribute("style", "fill: #FC8D59");
-              } else if (el.confirmed >= 5000 && el.confirmed < 20000) {
-                country.setAttribute("style", "fill: #EF6548");
-              } else if (el.confirmed >= 20000 && el.confirmed < 50000) {
-                country.setAttribute("style", "fill:	#D7301F");
-              } else if (el.confirmed >= 50000 && el.confirmed < 150000) {
-                country.setAttribute("style", "fill: #B30000");
-              } else if (el.confirmed >= 150000) {
-                country.setAttribute("style", "fill: #7F0000");
-              }
-            }
+          this.state.sortedCountries.forEach((el) => {
+            this.state.sortConfirmed(country, el);
           });
         });
         mapContainer.style.pointerEvents = "auto";
@@ -120,9 +99,28 @@ export default class Countries extends React.PureComponent {
     }
   };
 
-  render() {
-    // this.Viewer.fitToViewer();
+  scaleChange = () => {
+    const mapContainer = document.querySelector(".map-container");
+    this.props.setRenderScale((prev) => !prev);
 
+    const countries = document.querySelectorAll(".land");
+
+    if (this.state.sortedCountries) {
+      countries.forEach((country) => {
+        this.state.sortedCountries.forEach((el) => {
+          if (this.props.renderScale) {
+            this.state.sortDeaths(country, el);
+          } else {
+            this.state.sortConfirmed(country, el);
+          }
+        });
+      });
+      mapContainer.style.pointerEvents = "auto";
+    } else {
+      console.log("Failed data loading. Try again.");
+    }
+  };
+  render() {
     let miniature;
     if (window.innerWidth < 930) {
       miniature = "none";
@@ -132,13 +130,18 @@ export default class Countries extends React.PureComponent {
 
     return (
       <div style={{ overflow: "visible", height: "100%" }}>
-        <div className="btnContainer" style={{ position: "absolute" }}>
-          <button className="btnFit" onClick={() => this.fitSelection()}>
-            Fit area
-          </button>
+        {/* <button className="btnFit" onClick={() => this.fitSelection()}>
+          Fit area
+        </button> */}
+        <button className="toggleDeaths" onClick={this.scaleChange}>
+          {this.props.renderScale ? (
+            <>change to deaths</>
+          ) : (
+            <>change to infected</>
+          )}
+          {/* Infected / Dead */}
+        </button>
 
-          <hr />
-        </div>
         <ReactSVGPanZoom
           style={{ overflow: "visible", zIndex: "2" }}
           width={window.innerWidth}
@@ -166,7 +169,6 @@ export default class Countries extends React.PureComponent {
                 onTouchStart={this.handleClick}
                 onMouseOut={this.handleOut}
                 onTouchEnd={this.handleOut}
-                // style={{ fill: "green" }}
                 id="AE"
                 title="UAE"
                 className="land"

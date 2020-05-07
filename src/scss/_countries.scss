@@ -9,32 +9,58 @@
     }
   }
   .map-container {
-    // z-index: -1;
     height: 100vh;
     overflow: hidden;
     pointer-events: none;
-    // .btnFit {
-    //   position: absolute;
-    //   left: 100px;
-    //   top: 100px;
-    //   z-index: 999;
-    // }
 
-    & div {
+    .toggleDeaths {
+      position: absolute;
+      left: 50px;
+      bottom: 10px;
+      width: 170px;
+      z-index: 3;
+      background-color: #f9ffff;
+      border: 2px solid black;
+      border-radius: 5px;
+
+      &:active {
+        box-shadow: 0 4px #666;
+        transform: translateY(3px);
+      }
     }
-    & div > div {
-    }
+
     & div > div > svg {
       & > g {
         & > g {
           & .gBeforePath {
             transform: translate(330px, 40px) scale(1.2);
+            @media (max-width: 1650px) {
+              transform: translate(330px, 50px) scale(1.1);
+            }
+            @media (max-width: 1550px) {
+              transform: translate(300px, 50px) scale(1);
+            }
+            @media (max-width: 1400px) {
+              transform: translate(300px, 80px) scale(0.8);
+            }
+            @media (max-width: 1250px) {
+              transform: translate(300px, 100px) scale(0.7);
+            }
+            @media (max-width: 1150px) {
+              transform: translate(260px, 170px) scale(0.6);
+            }
+            @media (max-width: 1000px) {
+              transform: translate(240px, 170px) scale(0.5);
+            }
           }
         }
       }
     }
     div[role] {
-      margin-right: 30px;
+      transform: scale(1.7);
+
+      margin-right: 50px;
+      margin-bottom: 20px;
     }
   }
 }
