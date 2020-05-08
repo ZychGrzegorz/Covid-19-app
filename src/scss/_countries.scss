@@ -4,8 +4,10 @@
     color: #eeeeee;
     background-color: #333333;
     text-align: center;
+    z-index: 10;
     h1 {
       padding-bottom: 5px;
+      cursor: default;
     }
   }
   .map-container {
@@ -51,6 +53,12 @@
             }
             @media (max-width: 1000px) {
               transform: translate(240px, 170px) scale(0.5);
+            }
+            @media (max-width: 850px) {
+              transform: translate(240px, 170px) scale(0.4);
+            }
+            @media (max-width: 750px) {
+              transform: translate(200px, 30%) scale(0.3);
             }
           }
         }

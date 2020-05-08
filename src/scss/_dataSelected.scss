@@ -28,7 +28,11 @@
   p {
     transform: translateX(200px);
     transition-duration: 0s;
+    @media (max-width: 1000px) {
+      margin-bottom: 0;
+    }
   }
+
   .update {
     transform: translateX(0px);
     transition-duration: 0.3s;

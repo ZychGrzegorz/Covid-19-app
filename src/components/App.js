@@ -20,6 +20,7 @@ const App = () => {
 
   return (
     <main>
+      <div></div>
       <div className="App title">
         <h1 className="">Covid 19 around the world</h1>
       </div>

@@ -130,16 +130,12 @@ export default class Countries extends React.PureComponent {
 
     return (
       <div style={{ overflow: "visible", height: "100%" }}>
-        {/* <button className="btnFit" onClick={() => this.fitSelection()}>
-          Fit area
-        </button> */}
         <button className="toggleDeaths" onClick={this.scaleChange}>
           {this.props.renderScale ? (
-            <>change to deaths</>
+            <>change to: deaths</>
           ) : (
-            <>change to infected</>
+            <>change to: infected</>
           )}
-          {/* Infected / Dead */}
         </button>
 
         <ReactSVGPanZoom
