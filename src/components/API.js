@@ -1,15 +1,15 @@
 export function API() {
   const fetchAll = (getData) => {
-    fetch("https://covid-19-data.p.rapidapi.com/country/all?format=json", {
+    fetch("https://covid-193.p.rapidapi.com/statistics", {
       method: "GET",
       headers: {
-        "x-rapidapi-host": "covid-19-data.p.rapidapi.com",
+        "x-rapidapi-host": "covid-193.p.rapidapi.com",
         "x-rapidapi-key": "e41a8fafe3msha31f08bf4139fb9p1bb787jsn922eb1e78fff",
       },
     })
       .then((response) => response.json())
       .then((response) => {
-        getData(response);
+        getData(response.response);
       })
       .catch((err) => {
         getData("");

@@ -8,20 +8,19 @@ export default function DataSelected({ data, selectedCountry }) {
   useEffect(() => {
     // console.log("selected", selectedCountry); //co najechane
     data.forEach((el) => {
+      // console.log(el);
       if (el.country === selectedCountry) {
         // console.log("fituje", el);
         setCountry(el);
       }
     });
   }, [selectedCountry]);
-
+  // });
   useEffect(() => {
     if (country) {
       let pSelected = document.querySelectorAll(".dataSelected p");
-
       pSelected.forEach((p) => {
         p.classList.remove("update");
-
         setTimeout(() => {
           p.classList.add("update");
         }, 1);
@@ -36,7 +35,7 @@ export default function DataSelected({ data, selectedCountry }) {
           <p>
             confirmed:{" "}
             <NumberFormat
-              value={country.confirmed}
+              value={country.cases.total}
               displayType={"text"}
               thousandSeparator={true}
             />{" "}
@@ -44,7 +43,7 @@ export default function DataSelected({ data, selectedCountry }) {
           <p>
             recovered:{" "}
             <NumberFormat
-              value={country.recovered}
+              value={country.cases.recovered}
               displayType={"text"}
               thousandSeparator={true}
             />{" "}
@@ -52,7 +51,7 @@ export default function DataSelected({ data, selectedCountry }) {
           <p>
             critical:{" "}
             <NumberFormat
-              value={country.critical}
+              value={country.cases.critical}
               displayType={"text"}
               thousandSeparator={true}
             />{" "}
@@ -60,15 +59,14 @@ export default function DataSelected({ data, selectedCountry }) {
           <p>
             deaths:{" "}
             <NumberFormat
-              value={country.deaths}
+              value={country.deaths.total}
               displayType={"text"}
               thousandSeparator={true}
             />{" "}
           </p>
 
           <p>
-            last update:{" "}
-            <Moment parse="YYYY-MM-DD HH:mm" date={country.lastUpdate} />{" "}
+            last update: <Moment parse="YYYY-MM-DD HH:mm" date={country.time} />{" "}
           </p>
         </>
       ) : (

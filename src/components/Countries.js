@@ -33,6 +33,7 @@ export default class Countries extends React.PureComponent {
 
     setTimeout(() => {
       const countries = document.querySelectorAll(".land");
+      // console.log(countries);
       if (this.state.sortedCountries) {
         countries.forEach((country) => {
           this.state.sortedCountries.forEach((el) => {
@@ -49,8 +50,9 @@ export default class Countries extends React.PureComponent {
 
   componentDidUpdate() {
     this.setState({
+      // sortedCountries: this.props.data,
       sortedCountries: this.props.data.sort((a, b) => {
-        return a.confirmed - b.confirmed;
+        return a.cases.confirmed - b.cases.confirmed;
       }),
     });
   }
@@ -102,11 +104,12 @@ export default class Countries extends React.PureComponent {
   scaleChange = () => {
     const mapContainer = document.querySelector(".map-container");
     this.props.setRenderScale((prev) => !prev);
-
+    // console.log("change");
     const countries = document.querySelectorAll(".land");
 
     if (this.state.sortedCountries) {
       countries.forEach((country) => {
+        // console.log(country);
         this.state.sortedCountries.forEach((el) => {
           if (this.props.renderScale) {
             this.state.sortDeaths(country, el);
