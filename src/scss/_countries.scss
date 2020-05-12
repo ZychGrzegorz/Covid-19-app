@@ -8,6 +8,10 @@
     h1 {
       padding-bottom: 5px;
       cursor: default;
+      @media (max-width: 800px) {
+        font-size: 1.6em;
+        padding-top: 5px;
+      }
     }
   }
   .map-container {
@@ -24,6 +28,11 @@
       background-color: #f9ffff;
       border: 2px solid black;
       border-radius: 5px;
+      @media (max-width: 800px) {
+        left: 0;
+        width: 100px;
+        font-size: 0.8em;
+      }
 
       &:active {
         box-shadow: 0 4px #666;
@@ -35,7 +44,14 @@
       & > g {
         & > g {
           & .gBeforePath {
-            transform: translate(330px, 40px) scale(1.2);
+            // transform: translate(440px, 40px) scale(1.4);
+            transform: translate(18%, 40px) scale(2);
+            @media (max-width: 2100px) {
+              transform: translate(22%, 40px) scale(1.2);
+            }
+            @media (max-width: 1920px) {
+              transform: translate(430px, 40px) scale(1.2);
+            }
             @media (max-width: 1650px) {
               transform: translate(330px, 50px) scale(1.1);
             }
@@ -49,16 +65,22 @@
               transform: translate(300px, 100px) scale(0.7);
             }
             @media (max-width: 1150px) {
-              transform: translate(260px, 170px) scale(0.6);
+              transform: translate(23%, 170px) scale(0.6);
             }
             @media (max-width: 1000px) {
-              transform: translate(240px, 170px) scale(0.5);
+              transform: translate(23%, 170px) scale(0.5);
             }
             @media (max-width: 850px) {
               transform: translate(240px, 170px) scale(0.4);
             }
             @media (max-width: 750px) {
               transform: translate(200px, 30%) scale(0.3);
+            }
+            @media (max-width: 650px) {
+              transform: translate(28%, 15%) scale(0.4);
+            }
+            @media (max-width: 450px) {
+              transform: translate(10%, 32%) scale(0.3);
             }
           }
         }
@@ -82,4 +104,9 @@
 .land:active {
   stroke: black;
   stroke-width: 1;
+}
+
+.bold {
+  font-size: 1.1em;
+  font-weight: bold;
 }

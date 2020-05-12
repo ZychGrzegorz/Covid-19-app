@@ -34,7 +34,7 @@ export function API() {
           getTotalData("");
           console.log(err);
         });
-    }, 2000);
+    }, 500);
   };
 
   return { fetchAll, fetchTotal };

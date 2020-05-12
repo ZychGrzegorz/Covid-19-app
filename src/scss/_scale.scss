@@ -17,6 +17,19 @@
   @media (max-width: 1000px) {
     width: 16%;
   }
+  @media (max-width: 800px) {
+    height: auto;
+    width: 100px;
+    left: 0;
+  }
+  @media (max-width: 650px) {
+    font-size: 0.9em;
+    // line-height: 1;
+    height: auto;
+    width: auto;
+    left: 0;
+    padding: 5px;
+  }
 
   h2 {
     font-size: 1.2em;
@@ -70,6 +83,10 @@
       width: 15px;
       height: 15px;
       border: 1px solid black;
+      @media (max-width: 650px) {
+        height: 8px;
+        width: 8px;
+      }
     }
   }
 }

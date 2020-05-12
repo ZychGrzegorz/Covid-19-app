@@ -35,6 +35,7 @@ export default function DataSelected({ data, selectedCountry }) {
           <p>
             confirmed:{" "}
             <NumberFormat
+              className="bold"
               value={country.cases.total}
               displayType={"text"}
               thousandSeparator={true}
@@ -43,6 +44,7 @@ export default function DataSelected({ data, selectedCountry }) {
           <p>
             recovered:{" "}
             <NumberFormat
+              className="bold"
               value={country.cases.recovered}
               displayType={"text"}
               thousandSeparator={true}
@@ -51,6 +53,7 @@ export default function DataSelected({ data, selectedCountry }) {
           <p>
             critical:{" "}
             <NumberFormat
+              className="bold"
               value={country.cases.critical}
               displayType={"text"}
               thousandSeparator={true}
@@ -59,6 +62,7 @@ export default function DataSelected({ data, selectedCountry }) {
           <p>
             deaths:{" "}
             <NumberFormat
+              className="bold"
               value={country.deaths.total}
               displayType={"text"}
               thousandSeparator={true}
@@ -66,7 +70,12 @@ export default function DataSelected({ data, selectedCountry }) {
           </p>
 
           <p>
-            last update: <Moment parse="YYYY-MM-DD HH:mm" date={country.time} />{" "}
+            last update:{" "}
+            <Moment
+              className="bold"
+              parse="YYYY-MM-DD HH:mm"
+              date={country.time}
+            />{" "}
           </p>
         </>
       ) : (

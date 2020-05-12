@@ -24,6 +24,20 @@
     height: 250px;
     width: 15%;
   }
+  @media (max-width: 800px) {
+    height: auto;
+    width: 150px;
+    left: 0;
+    top: 50px;
+  }
+  @media (max-width: 650px) {
+    height: auto;
+    width: 150px;
+    left: 0;
+    top: 30px;
+    padding: 5px;
+    font-size: 0.9em;
+  }
   display: flex;
   flex-direction: column;
   justify-content: center;
